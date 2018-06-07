@@ -2,6 +2,8 @@ import tkinter as tk
 import backend as b
 import time
 
+import tkinter.messagebox
+
 
 DEFAULT_X_SIZE = 10
 DEFAULT_Y_SIZE = 10
@@ -14,7 +16,11 @@ class Application(tk.Frame):
         self.master = master
         self.pack()
         self.create_ui(master)
+        self.state = None
+        self.iteration = 0
 
+    # TODO(aelphy): add max_epochs parameter
+    # TODO(aelphy): add parameter illness duration
     def create_ui(self, master):
         master.title("Game of Life")
         self.grid(row=10, column=10)
@@ -55,7 +61,7 @@ class Application(tk.Frame):
            self.field.append([])
 
            for j in range(int(self.y.get())):
-               self.field[-1].append(tk.Button(self.master, fg="white", width=2, height=1))
+               self.field[-1].append(tk.Button(self.master, bg="white", width=2, height=1))
                self.field[-1][-1].grid(row=i, column=3 + j)
                self.field[-1][-1]['command'] = self.gen_cell_click_func(self.field[-1][-1])
 
@@ -72,51 +78,77 @@ class Application(tk.Frame):
             cell['bg']= "white"
 
     def regenerate_grid(self):
-        pass
         try:
-            for i in range(int(self.x.get())):
-                self.field.append([])
+            for i in range(len(self.field)):
+                for j in range(len(self.field[i])):
+                    self.field[i][j].destroy()
 
-                for j in range(int(self.y.get())):
-                    self.field[-1].append(tk.Button(self.master, bg="white", width=2, height=1))
-                    self.field[-1][-1].grid(row=0 + i, column=3 + j)
+            self.field = []
+
+            for i in range(int(self.x.get())):
+               self.field.append([])
+
+               for j in range(int(self.y.get())):
+                   self.field[-1].append(tk.Button(self.master, bg="white", width=2, height=1))
+                   self.field[-1][-1].grid(row=i, column=3 + j)
+                   self.field[-1][-1]['command'] = self.gen_cell_click_func(self.field[-1][-1])
         except ValueError:
             tk.messagebox.showinfo("Game of Life", "Axis must be an integer")
 
-    def start(self, matrix, loop):
-        pass
-        if 0 <= int(self.rnd.get()) <= 1:
-            pass
-        else:
+    def draw_state(self, state):
+        assert(state.shape[0] == len(self.field))
+        assert(state.shape[1] == len(self.field[0]))
+
+        for i in range(len(self.field)):
+            for j in range(len(self.field[i])):
+                if state[i, j] == 0:
+                    self.field[i][j]['bg'] = 'white'
+                elif self.field[i][j] == -1:
+                    self.field[i][j]['bg'] = 'black'
+                elif 1 <= state[i, j] <= 4: # 4 here is the duration of illness
+                    self.field[i][j]['bg'] = 'red'
+                else:
+                    tk.messagebox.showinfo("Game of Life", "smth went wrong, check the code, wrong value of the cell")
+
+    # TODO(aelphy): add the possibility to add dead cells in the initial configuration
+    # TODO(aelphy): add parameters of random initialization as a parameter
+    # TODO(aelphy): add maximal game duration as a parameter
+    # TODO(aelphy): think about immunity
+    def start(self):
+        if not (0 <= int(self.rnd.get()) <= 1):
             tk.messagebox.showinfo("Game of Life", "Entry must be between 0 and 1")
-            stop()
             return
 
         self.end_button.configure(state=tk.NORMAL)
-        random_start()
+        self.start_button.configure(state=tk.DISABLED)
+        self.regenerate_grid_button.configure(state=tk.DISABLED)
 
-        for i in range(int(self.x.get())):
-            for j in range(int(self.y.get())):
-                if matrix[i][j] == 0:
-                    self.field[i][j]['bg'] = ["black"]
+        self.state = b.gen_initial_state(int(self.x.get()), int(self.y.get()), 4, int(self.rnd.get()) == 1) # 4 here is the duration of illness
 
-    #        global loop
-    #        while loop == True:
-    #
-    #            simulate()
-    #
-    #            if len(current[(current == -1) | (current == 0)] == np.prod(current.shape):
-    #               print(It took {} periods to eliminate the disease).format(periods)
-    #                break
-    #
-    #            time.sleep(1)
+        if int(self.rnd.get()) == 1:
+            self.draw_state(self.state)
+        else:
+            for i in range(len(self.field)):
+                for j in range(len(self.field[i])):
+                    if self.field[i][j]['bg'] == 'white':
+                        self.state[i, j] = 0
+                    elif self.field[i][j]['bg'] == 'red':
+                        self.state[i, j] = 1
+                    else:
+                        tk.messagebox.showinfo("Game of Life", "smth went wrong, check the code, wrong value of the cell")
+
+        while True:
+            # if the state is stable stop the game
+            # if b.is_stable(self.state) or some other criteria to stop goes here:
+            #     self.stop()
+            #     return
+
+            self.state = b.next_state(self.state, params)
+            self.draw_state(self.state)
 
     def stop(self):
-        pass
-        loop = False
-        self.regenerate_grid()
-        pass
-
+        self.end_button.configure(state=tk.DISABLED)
+        self.start_button.configure(state=tk.NORMAL)
 
 if __name__ == '__main__':
     root = tk.Tk()

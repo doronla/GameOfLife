@@ -1,12 +1,37 @@
 import numpy as np
 
 
-def generate_random_position(x, y):
-    return np.random.randint(0, 2, size=x * y).reshape(x, y)
-    
+def gen_initial_state(x, y, n, is_random):
+    if is_random:
+        return np.random.randint(0, 2, size=x * y).reshape(x, y)
+    else:
+        return np.zeros(x, y)
 
-def rules(current, count):
-    new = np.zeros_like(matrix)
+
+def is_stable(state):
+    return len(state[(state == -1) | (state == 0)]) == np.prod(state.shape)
+
+
+def next_state(prev_state, p):
+    new_state = np.zeros_like(prev_state)
+
+    for i in range(prev_state.shape[0]):
+        for j in range(prev_state.shape[1]):
+            if prev_state[i, j] == -1:
+                new_state[i, j] = -1
+            else:
+                # for every ill cell:
+                #     make dicisions about death
+                # for every healthy cell:
+                #     if ill_neighbours_present(prev_state, i, j):
+                #         if np.random.random() <= p:
+                #             new_state[i, j] =
+                #         else
+                #             new_state[i, j] =
+
+### PRIVATE INERNAL FUNCTIONS
+
+def ill_neighbours_present(prev_state, i, j):
     for i in range(int(x.get())):
         for j in range(int(y.get())):
             if matrix[i][j] == -1 and count == 3:
