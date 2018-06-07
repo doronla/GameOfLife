@@ -7,7 +7,7 @@ import tkinter.messagebox
 
 DEFAULT_X_SIZE = 10
 DEFAULT_Y_SIZE = 10
-DEFAULT_PROB = 0
+DEFAULT_PROB = 0.5
 DEFAULT_CYCLE = 100
 
 
@@ -18,9 +18,9 @@ class Application(tk.Frame):
         self.pack()
         self.create_ui(master)
         self.state = None
-        self.iteration = 0
+        self.running = False
+        self.after(1000, self.manage)
 
-    # TODO(aelphy): add max_epochs parameter
     # TODO(aelphy): add parameter illness duration
     def create_ui(self, master):
         master.title("Game of Life")
@@ -109,16 +109,33 @@ class Application(tk.Frame):
             for j in range(len(self.field[i])):
                 if state[i, j] == 0:
                     self.field[i][j]['bg'] = 'white'
-                elif self.field[i][j] == -1:
+                elif state[i, j] == -1:
                     self.field[i][j]['bg'] = 'black'
                 elif 1 <= state[i, j] <= 4:  # 4 here is the duration of illness
                     self.field[i][j]['bg'] = 'red'
                 else:
                     tk.messagebox.showinfo("Game of Life", "smth went wrong, check the code, wrong value of the cell")
 
-    # TODO(aelphy): add the possibility to add dead cells in the initial configuration
+
+    def manage(self):
+        if self.running:
+            self.next_iter()
+
+        self.after(1000, self.manage)
+
+    def next_iter(self):
+        # if the state is stable stop the game
+        if b.is_stable(self.state) or self.period == int(self.cycle.get()):
+             self.stop()
+             return
+
+        self.state = b.next_state(self.state, float(self.prob.get()))
+        self.draw_state(self.state)
+        self.period += 1
+
+
+    # TODO(aelphy): add the possibility to add dead cells in the initial configuration ?
     # TODO(aelphy): add parameters of random initialization as a parameter
-    # TODO(aelphy): add maximal game duration as a parameter: DONE
     # TODO(aelphy): think about immunity
     def start(self):
         if not (0 <= int(self.rnd.get()) <= 1):
@@ -127,8 +144,11 @@ class Application(tk.Frame):
 
         self.end_button.configure(state=tk.NORMAL)
         self.start_button.configure(state=tk.DISABLED)
+        self.iteration = 0
         self.regenerate_grid_button.configure(state=tk.DISABLED)
 
+        self.period = 0
+        self.running = True
         self.state = b.gen_initial_state(int(self.x.get()), int(self.y.get()), 4, int(self.rnd.get()) == 1)  # 4 here is the duration of illness
 
         if int(self.rnd.get()) == 1:
@@ -143,20 +163,12 @@ class Application(tk.Frame):
                     else:
                         tk.messagebox.showinfo("Game of Life", "smth went wrong, check the code, wrong value of the cell")
 
-        while True:
-            period = 0
-            # if the state is stable stop the game
-            if b.is_stable(self.state) or period == int(self.cycle.get()):
-                 self.stop()
-                 return
-
-            self.state = b.next_state(self.state, float(self.prob.get()))
-            self.draw_state(self.state)
-            period += 1
 
     def stop(self):
         self.end_button.configure(state=tk.DISABLED)
         self.start_button.configure(state=tk.NORMAL)
+        self.regenerate_grid_button.configure(state=tk.NORMAL)
+        self.running = False
 
 if __name__ == '__main__':
     root = tk.Tk()
