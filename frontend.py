@@ -160,6 +160,8 @@ class Application(tk.Frame):
                         self.state[i, j] = 0
                     elif self.field[i][j]['bg'] == 'red':
                         self.state[i, j] = 1
+                    elif self.field[i][j]['bg'] == 'black':
+                        self.state[i, j] = -1
                     else:
                         tk.messagebox.showinfo("Game of Life", "smth went wrong, check the code, wrong value of the cell")
 
