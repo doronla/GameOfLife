@@ -1,46 +1,9 @@
-# PSEUDO CODE
 import numpy as np
 
 
-np.random.seed(42)
-
-
-#class Backend:
-#
-#    def __init__(self, size_x, size_y):
-#        self.size_x = size_x
-#        self.size_y = size_y
-#        self.initial_matrix = []
-#
-#
-#    def initial_state(self):
-#        np.random.seed(42)
-#        self.initial_matrix = np.full((self.size_x, self.size_y), -1, dtype=int)
-#        mask = np.product(self.initial_matrix.shape)
-#        self.initial_matrix.ravel()[np.random.randint(1, mask, size=10)] = np.random.rand(10)
-#        #        np.place(initial_matrix, initial_matrix == 0, 1)
-#        return self.initial_matrix
-#
-#    def random_start(self):
-#        self.initial_state()
-#        for x in np.nditer(self.initial_matrix):
-#            if np.random.randint(2) == 1:
-#                x += 1
-#        print(test.initial_matrix)
-
-
-def random_start():
-    global matrix
-    matrix = [[(np.random.choice((-1, 0))) for i in range(10)] for j in range(10)]
-    print(matrix)
-#    for i in range(10):
-#        for j in range(10):
-#            if matrix[i][j] == 0:
-#                fe.self.field[i][j]['bg'] = ["black"]
-
-
-def custom_start():
-    matrix = [[-1 for i in range(10)] for j in range(10)]
+def generate_random_position(x, y):
+    return np.random.randint(0, 2, size=x * y).reshape(x, y)
+    
 
 def rules(current, count):
     new = np.zeros_like(matrix)
@@ -118,5 +81,3 @@ def render():
                 fe.field[i][j]['bg'] = ["red"]
             else:
                 fe.field[i][j]['bg'] = ["white"]
-
-

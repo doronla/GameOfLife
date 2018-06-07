@@ -1,8 +1,7 @@
 import tkinter as tk
-from tkinter import *
-from tkinter import messagebox
+import backend as b
 import time
-from backend import *
+
 
 DEFAULT_X_SIZE = 10
 DEFAULT_Y_SIZE = 10
@@ -15,21 +14,17 @@ class Application(tk.Frame):
         self.master = master
         self.pack()
         self.create_ui(master)
-        self.field = []
-
 
     def create_ui(self, master):
         master.title("Game of Life")
         self.grid(row=10, column=10)
 
         tk.Label(master, text="Size x-Axis").grid(row=0)
-        global x
         self.x = tk.Entry(master)
         self.x.insert(10, str(DEFAULT_X_SIZE))
         self.x.grid(row=0, column=1)
 
         tk.Label(master, text="Size y-Axis").grid(row=1)
-        global y
         self.y = tk.Entry(master)
         self.y.insert(10, str(DEFAULT_X_SIZE))
         self.y.grid(row=1, column=1)
@@ -48,39 +43,36 @@ class Application(tk.Frame):
         self.quit_button = tk.Button(master, text="Quit", command=quit)
         self.quit_button.grid(row=4, column=1)
 
-        self.start_button = tk.Button(master, text="Start", command=random_start)
+        self.start_button = tk.Button(master, text="Start", command=self.start)
         self.start_button.grid(row=5, column=0)
 
         self.end_button = tk.Button(master, text="Stop", command=self.stop)
         self.end_button.grid(row=5, column=1)
         self.end_button.configure(state=tk.DISABLED)
 
-#        self.field = []
-#        for i in range(int(self.x.get())):
-#            self.field.append([])
-#
-#            for j in range(int(self.y.get())):
-#                self.field[-1].append(tk.Button(self.master, bg="white", width=2, height=1))
-#                self.field[-1][-1].grid(row=0 + i, column=3 + j)
+        self.field = []
+        for i in range(int(self.x.get())):
+           self.field.append([])
 
-        self.field = [[Button(self.master, bg="white", width=2, height=1) for i in range(int(self.x.get()) + 2)]
-                             for j in range(int(self.y.get()) + 2)]
+           for j in range(int(self.y.get())):
+               self.field[-1].append(tk.Button(self.master, fg="white", width=2, height=1))
+               self.field[-1][-1].grid(row=i, column=3 + j)
+               self.field[-1][-1]['command'] = self.gen_cell_click_func(self.field[-1][-1])
 
-        for i in range(0, int(self.x.get()) + 1):
-            for j in range(0, int(self.y.get()) + 1):
-                self.field[-i][j].grid(row=0 + i, column=3 + j)
-                # in a custom game, the user turns the cells dead or alive on their own
-                self.field[i][j]['command'] = lambda i=i, j=j: self.cell_toggle(self.field[i][j])
+    def gen_cell_click_func(self, cell):
+        def f():
+            self.cell_toggle(cell)
 
+        return f
 
     def cell_toggle(self, cell):
         if cell['bg'] == "white":
-            cell['bg'] = "black"
+            cell['bg'] = "red"
         else:
-            cell['bg'] = "white"
+            cell['bg']= "white"
 
     def regenerate_grid(self):
-
+        pass
         try:
             for i in range(int(self.x.get())):
                 self.field.append([])
@@ -92,6 +84,7 @@ class Application(tk.Frame):
             tk.messagebox.showinfo("Game of Life", "Axis must be an integer")
 
     def start(self, matrix, loop):
+        pass
         if 0 <= int(self.rnd.get()) <= 1:
             pass
         else:
@@ -119,6 +112,7 @@ class Application(tk.Frame):
     #            time.sleep(1)
 
     def stop(self):
+        pass
         loop = False
         self.regenerate_grid()
         pass
