@@ -8,6 +8,7 @@ import tkinter.messagebox
 DEFAULT_X_SIZE = 10
 DEFAULT_Y_SIZE = 10
 DEFAULT_PROB = 0
+DEFAULT_CYCLE = 100
 
 
 class Application(tk.Frame):
@@ -40,20 +41,25 @@ class Application(tk.Frame):
         self.prob.insert(10, str(DEFAULT_PROB))
         self.prob.grid(row=2, column=1)
 
+        tk.Label(master, text="Number of Periods").grid(row=3)
+        self.cycle = tk.Entry(master)
+        self.cycle.insert(10, str(DEFAULT_CYCLE))
+        self.cycle.grid(row=3, column=1)
+
         self.rnd = tk.IntVar()
-        tk.Checkbutton(master, text="Random initial position", variable=self.rnd).grid(row=3)
+        tk.Checkbutton(master, text="Random initial position", variable=self.rnd).grid(row=4)
 
         self.regenerate_grid_button = tk.Button(master, text="Regenerate Grid", command=self.regenerate_grid)
-        self.regenerate_grid_button.grid(row=4, column=0)
+        self.regenerate_grid_button.grid(row=5, column=0)
 
         self.quit_button = tk.Button(master, text="Quit", command=quit)
-        self.quit_button.grid(row=4, column=1)
+        self.quit_button.grid(row=5, column=1)
 
         self.start_button = tk.Button(master, text="Start", command=self.start)
-        self.start_button.grid(row=5, column=0)
+        self.start_button.grid(row=6, column=0)
 
         self.end_button = tk.Button(master, text="Stop", command=self.stop)
-        self.end_button.grid(row=5, column=1)
+        self.end_button.grid(row=6, column=1)
         self.end_button.configure(state=tk.DISABLED)
 
         self.field = []
@@ -75,7 +81,7 @@ class Application(tk.Frame):
         if cell['bg'] == "white":
             cell['bg'] = "red"
         else:
-            cell['bg']= "white"
+            cell['bg'] = "white"
 
     def regenerate_grid(self):
         try:
@@ -105,14 +111,14 @@ class Application(tk.Frame):
                     self.field[i][j]['bg'] = 'white'
                 elif self.field[i][j] == -1:
                     self.field[i][j]['bg'] = 'black'
-                elif 1 <= state[i, j] <= 4: # 4 here is the duration of illness
+                elif 1 <= state[i, j] <= 4:  # 4 here is the duration of illness
                     self.field[i][j]['bg'] = 'red'
                 else:
                     tk.messagebox.showinfo("Game of Life", "smth went wrong, check the code, wrong value of the cell")
 
     # TODO(aelphy): add the possibility to add dead cells in the initial configuration
     # TODO(aelphy): add parameters of random initialization as a parameter
-    # TODO(aelphy): add maximal game duration as a parameter
+    # TODO(aelphy): add maximal game duration as a parameter: DONE
     # TODO(aelphy): think about immunity
     def start(self):
         if not (0 <= int(self.rnd.get()) <= 1):
@@ -123,7 +129,7 @@ class Application(tk.Frame):
         self.start_button.configure(state=tk.DISABLED)
         self.regenerate_grid_button.configure(state=tk.DISABLED)
 
-        self.state = b.gen_initial_state(int(self.x.get()), int(self.y.get()), 4, int(self.rnd.get()) == 1) # 4 here is the duration of illness
+        self.state = b.gen_initial_state(int(self.x.get()), int(self.y.get()), 4, int(self.rnd.get()) == 1)  # 4 here is the duration of illness
 
         if int(self.rnd.get()) == 1:
             self.draw_state(self.state)
@@ -138,13 +144,15 @@ class Application(tk.Frame):
                         tk.messagebox.showinfo("Game of Life", "smth went wrong, check the code, wrong value of the cell")
 
         while True:
+            period = 0
             # if the state is stable stop the game
-            # if b.is_stable(self.state) or some other criteria to stop goes here:
-            #     self.stop()
-            #     return
+            if b.is_stable(self.state) or period == int(self.cycle.get()):
+                 self.stop()
+                 return
 
-            self.state = b.next_state(self.state, params)
+            self.state = b.next_state(self.state, float(self.prob.get()))
             self.draw_state(self.state)
+            period += 1
 
     def stop(self):
         self.end_button.configure(state=tk.DISABLED)
